@@ -1,0 +1,48 @@
+name: Cache Prime and Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js (if using Node project)
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Step 3: Cache dependencies
+      - name: prime-cache-0839daa
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: cache-0839daa
+          restore-keys: |
+            cache-
+
+      # Step 4: Echo whether the cache was hit or missed
+      - name: Echo cache result
+        run: |
+          if [ "${{ steps.cache.outputs.cache-hit }}" = "true" ]; then
+            echo "Cache hit for key cache-0839daa ✅"
+          else
+            echo "Cache miss for key cache-0839daa ❌"
+          fi
+
+      # Step 5: Install dependencies (this primes the cache)
+      - name: Install dependencies
+        run: npm install
+
+      # Step 6: Optional build step
+      - name: Build project
+        run: npm run build || echo "No build script defined"
